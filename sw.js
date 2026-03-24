@@ -1,5 +1,5 @@
 /* lot-calculator-web — HTML はネットワーク優先（常に最新を優先）、オフライン時のみキャッシュ */
-const CACHE = 'tra-lot-calc-v3';
+const CACHE = 'tra-lot-calc-v4';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

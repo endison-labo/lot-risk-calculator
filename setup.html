@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>初期設定（係数 k）— ロット計算</title>
+  <title>初期設定 — ロット計算</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0d1117" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -91,8 +91,8 @@
   <div class="back-row">
     <a href="index.html">← ロット計算に戻る</a>
   </div>
-  <h1>初期設定（係数 k）</h1>
-  <p class="sub">実トレード1件から <code>k = |損益円| ÷ (ロット × 価格の動き$)</code> を保存します。</p>
+  <h1>初期設定</h1>
+  <p class="sub">実トレード<strong>1件分</strong>のロット・損益（円）・価格の動き（ドル）から、あなたの口座用の<strong>換算</strong>を保存します（中の計算だけの話なので覚えなくて大丈夫です）。</p>
 
   <section>
     <h2>キャリブレーション</h2>
@@ -113,14 +113,14 @@
         <input type="number" id="calExit" step="0.01" placeholder="2646.5" />
       </div>
     </div>
-    <button type="button" class="primary" id="btnCal">係数 k を保存</button>
-    <button type="button" class="danger" id="btnClear">k をクリア</button>
+    <button type="button" class="primary" id="btnCal">換算を保存</button>
+    <button type="button" class="danger" id="btnClear">保存した換算を消す</button>
     <div id="calMsg" class="msg"></div>
-    <div class="result">現在の k: <span class="kval" id="kVal">—</span></div>
+    <div class="result">保存中の換算: <span class="kval" id="kVal">—</span></div>
   </section>
 
   <footer>
-    係数はこのブラウザの localStorage にだけ保存されます。
+    換算はこのブラウザにだけ保存されます（他端末とは同期しません）。
   </footer>
 
   <script>
@@ -174,7 +174,7 @@
       }
       const k = Math.abs(pnl) / (lot * w);
       if (!(k > 0) || !Number.isFinite(k)) {
-        msg.textContent = '係数を計算できませんでした。';
+        msg.textContent = '換算を求められませんでした。入力を確認してください。';
         msg.classList.add('err');
         return;
       }
@@ -186,7 +186,7 @@
 
     document.getElementById('btnClear').addEventListener('click', () => {
       clearK();
-      document.getElementById('calMsg').textContent = 'k を削除しました。';
+      document.getElementById('calMsg').textContent = '保存した換算を消しました。';
       document.getElementById('calMsg').className = 'msg ok';
       refreshKDisplay();
     });
