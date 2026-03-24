@@ -1,7 +1,7 @@
 {
   "name": "ロット計算（TRA）",
   "short_name": "ロット計算",
-  "description": "係数キャリブレーションと推奨ロット（ゴールド裁量目安）",
+  "description": "実トレードから換算を登録し、推奨ロットを出す（ゴールド裁量目安）",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
