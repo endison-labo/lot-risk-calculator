@@ -34,8 +34,45 @@
       margin-left: auto;
       margin-right: auto;
     }
-    h1 { font-size: 1.15rem; margin: 0 0 4px; font-weight: 700; }
-    .sub { color: var(--muted); font-size: 0.8rem; margin-bottom: 20px; }
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+    h1 { font-size: 1.15rem; margin: 0; font-weight: 700; flex: 1; min-width: 0; }
+    .icon-btn {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      background: #21262d;
+      border: 1px solid var(--border);
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .icon-btn svg { width: 22px; height: 22px; fill: currentColor; }
+    .sub { color: var(--muted); font-size: 0.8rem; margin: 0 0 10px; }
+    .k-strip {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+      padding: 8px 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .k-strip .kval { color: var(--ok); font-weight: 600; }
+    .k-strip a { color: var(--accent); font-size: 0.75rem; white-space: nowrap; }
     section {
       background: var(--card);
       border: 1px solid var(--border);
@@ -56,8 +93,6 @@
       color: var(--text);
       font-size: 1rem;
     }
-    .row { display: flex; gap: 8px; }
-    .row input { flex: 1; }
     button {
       margin-top: 12px;
       padding: 10px 14px;
@@ -70,51 +105,33 @@
       width: 100%;
     }
     button.primary { background: var(--accent); border-color: var(--accent); color: #0d1117; }
-    button.danger { background: transparent; color: var(--err); border-color: var(--err); margin-top: 8px; }
     .msg { margin-top: 10px; font-size: 0.85rem; }
     .msg.ok { color: var(--ok); }
     .msg.err { color: var(--err); }
     .result { margin-top: 12px; padding: 10px; background: var(--bg); border-radius: 6px; font-size: 0.95rem; }
-    .kval { color: var(--ok); font-weight: 700; }
     footer { color: var(--muted); font-size: 0.7rem; margin-top: 24px; }
     a { color: var(--accent); }
   </style>
 </head>
 <body>
-  <h1>ロット計算</h1>
-  <p class="sub">係数 k を1回セット → 残高・リスク%・SL（ドル）から推奨ロット（ブラウザに保存）</p>
+  <div class="header-row">
+    <h1>ロット計算</h1>
+    <a href="setup.html" class="icon-btn" aria-label="初期設定（係数 k）" title="初期設定">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+    </a>
+  </div>
+  <p class="sub">残高・リスク%・SL（ドル）から推奨ロット。係数 k は⚙で設定。</p>
+
+  <div class="k-strip">
+    <span>保存済み k: <span class="kval" id="kValShort">—</span></span>
+    <a href="setup.html">変更する</a>
+  </div>
 
   <section>
-    <h2>1. 係数 k（キャリブレーション）</h2>
-    <p class="sub" style="margin-bottom:10px">実トレード1件: k = |損益円| ÷ (ロット × 価格の動きドル)</p>
-    <label>ロット</label>
-    <input type="number" id="calLot" step="0.01" min="0" placeholder="0.11" />
-    <label>損益（円）※プラマイどちらでも可</label>
-    <input type="number" id="calPnl" step="1" placeholder="-7500" />
-    <label>値幅（ドル）— 直接</label>
-    <input type="number" id="calWidth" step="0.01" min="0" placeholder="4" />
-    <p class="sub" style="margin:10px 0 0;">または 建値・決済値（|終−始| をドル幅に）</p>
-    <div class="row">
-      <div style="flex:1">
-        <label>建値</label>
-        <input type="number" id="calEntry" step="0.01" placeholder="2650.5" />
-      </div>
-      <div style="flex:1">
-        <label>決済値</label>
-        <input type="number" id="calExit" step="0.01" placeholder="2646.5" />
-      </div>
-    </div>
-    <button type="button" class="primary" id="btnCal">係数 k を保存</button>
-    <button type="button" class="danger" id="btnClear">k をクリア</button>
-    <div id="calMsg" class="msg"></div>
-    <div class="result" id="kDisplay">保存済み k: <span class="kval" id="kVal">—</span></div>
-  </section>
-
-  <section>
-    <h2>2. 推奨ロット</h2>
+    <h2>推奨ロット</h2>
     <label>残高（円）</label>
     <input type="number" id="balance" step="1000" min="0" placeholder="200000" />
-    <label>リスク %（例: TRA 6）</label>
+    <label>リスク %（例: 6）</label>
     <input type="number" id="riskPct" step="0.1" min="0" value="6" />
     <label>SL 幅（ドル）</label>
     <input type="number" id="slDollars" step="0.1" min="0" value="4" />
@@ -127,7 +144,6 @@
 
   <footer>
     教育・目安用。発注前は口座・ブローカーで確認してください。
-    <br />HTTPS でホストすると PWA としてホーム画面に追加可（README 参照）。
   </footer>
 
   <script>
@@ -138,64 +154,13 @@
       return v > 0 && Number.isFinite(v) ? v : null;
     }
 
-    function saveK(k) {
-      localStorage.setItem(LS_KEY, String(k));
-    }
-
-    function clearK() {
-      localStorage.removeItem(LS_KEY);
-    }
-
-    function refreshKDisplay() {
+    function refreshKShort() {
       const k = loadK();
-      document.getElementById('kVal').textContent = k != null ? k.toFixed(2) + ' 円/(ロット·ドル)' : '—（未設定）';
+      const el = document.getElementById('kValShort');
+      el.textContent = k != null ? k.toFixed(2) + ' 円/(L·$)' : '未設定';
+      if (k == null) el.classList.remove('kval');
+      else el.classList.add('kval');
     }
-
-    function dollarWidthFromPrices() {
-      const a = parseFloat(document.getElementById('calEntry').value, 10);
-      const b = parseFloat(document.getElementById('calExit').value, 10);
-      if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
-      return Math.abs(b - a);
-    }
-
-    document.getElementById('btnCal').addEventListener('click', () => {
-      const msg = document.getElementById('calMsg');
-      msg.textContent = '';
-      msg.className = 'msg';
-
-      let lot = parseFloat(document.getElementById('calLot').value, 10);
-      let pnl = parseFloat(document.getElementById('calPnl').value, 10);
-      let w = parseFloat(document.getElementById('calWidth').value, 10);
-      const wp = dollarWidthFromPrices();
-      if (Number.isFinite(wp) && wp > 0) w = wp;
-      if (!(lot > 0) || !(w > 0)) {
-        msg.textContent = 'ロットと値幅（ドル）を入力するか、建値・決済値を入れてください。';
-        msg.classList.add('err');
-        return;
-      }
-      if (!Number.isFinite(pnl)) {
-        msg.textContent = '損益（円）を入力してください。';
-        msg.classList.add('err');
-        return;
-      }
-      const k = Math.abs(pnl) / (lot * w);
-      if (!(k > 0) || !Number.isFinite(k)) {
-        msg.textContent = '係数を計算できませんでした。';
-        msg.classList.add('err');
-        return;
-      }
-      saveK(k);
-      msg.textContent = '保存しました。';
-      msg.classList.add('ok');
-      refreshKDisplay();
-    });
-
-    document.getElementById('btnClear').addEventListener('click', () => {
-      clearK();
-      document.getElementById('calMsg').textContent = 'k を削除しました。';
-      document.getElementById('calMsg').className = 'msg ok';
-      refreshKDisplay();
-    });
 
     document.getElementById('btnCalc').addEventListener('click', () => {
       const msg = document.getElementById('calcMsg');
@@ -206,7 +171,7 @@
 
       const k = loadK();
       if (k == null) {
-        msg.textContent = '先に係数 k を保存してください。';
+        msg.innerHTML = '係数 k が未設定です。右上⚙の<strong>初期設定</strong>で保存してください。';
         msg.classList.add('err');
         return;
       }
@@ -235,7 +200,8 @@
         '</strong> ロット';
     });
 
-    refreshKDisplay();
+    refreshKShort();
+    window.addEventListener('pageshow', refreshKShort);
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(function () {});

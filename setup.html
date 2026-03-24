@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>初期設定（係数 k）— ロット計算</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#0d1117" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --ok: #3fb950;
+      --err: #f85149;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 16px;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .back-row { margin-bottom: 12px; }
+    .back-row a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    h1 { font-size: 1.1rem; margin: 0 0 4px; font-weight: 700; }
+    .sub { color: var(--muted); font-size: 0.8rem; margin: 0 0 16px; }
+    section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+    h2 { font-size: 0.95rem; margin: 0 0 12px; color: var(--accent); font-weight: 600; }
+    label { display: block; font-size: 0.75rem; color: var(--muted); margin-top: 10px; }
+    label:first-of-type { margin-top: 0; }
+    input {
+      width: 100%;
+      margin-top: 4px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1rem;
+    }
+    .row { display: flex; gap: 8px; }
+    .row input { flex: 1; }
+    button {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #21262d;
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+    }
+    button.primary { background: var(--accent); border-color: var(--accent); color: #0d1117; }
+    button.secondary { margin-top: 8px; background: transparent; color: var(--accent); border-color: var(--border); }
+    button.danger { background: transparent; color: var(--err); border-color: var(--err); margin-top: 8px; }
+    .msg { margin-top: 10px; font-size: 0.85rem; }
+    .msg.ok { color: var(--ok); }
+    .msg.err { color: var(--err); }
+    .result { margin-top: 12px; padding: 10px; background: var(--bg); border-radius: 6px; font-size: 0.95rem; }
+    .kval { color: var(--ok); font-weight: 700; }
+    footer { color: var(--muted); font-size: 0.7rem; margin-top: 24px; }
+    code { font-size: 0.8em; background: var(--bg); padding: 2px 6px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="back-row">
+    <a href="index.html">← ロット計算に戻る</a>
+  </div>
+  <h1>初期設定（係数 k）</h1>
+  <p class="sub">実トレード1件から <code>k = |損益円| ÷ (ロット × 価格の動き$)</code> を保存します。</p>
+
+  <section>
+    <h2>キャリブレーション</h2>
+    <label>ロット</label>
+    <input type="number" id="calLot" step="0.01" min="0" placeholder="0.11" />
+    <label>損益（円）※プラマイどちらでも可</label>
+    <input type="number" id="calPnl" step="1" placeholder="-7500" />
+    <label>値幅（ドル）— 直接</label>
+    <input type="number" id="calWidth" step="0.01" min="0" placeholder="4" />
+    <p class="sub" style="margin:10px 0 0;">または 建値・決済値（|終−始| をドル幅に）</p>
+    <div class="row">
+      <div style="flex:1">
+        <label>建値</label>
+        <input type="number" id="calEntry" step="0.01" placeholder="2650.5" />
+      </div>
+      <div style="flex:1">
+        <label>決済値</label>
+        <input type="number" id="calExit" step="0.01" placeholder="2646.5" />
+      </div>
+    </div>
+    <button type="button" class="primary" id="btnCal">係数 k を保存</button>
+    <button type="button" class="danger" id="btnClear">k をクリア</button>
+    <div id="calMsg" class="msg"></div>
+    <div class="result">現在の k: <span class="kval" id="kVal">—</span></div>
+  </section>
+
+  <footer>
+    係数はこのブラウザの localStorage にだけ保存されます。
+  </footer>
+
+  <script>
+    const LS_KEY = 'tra.lotRisk.coefficientK';
+
+    function loadK() {
+      const v = parseFloat(localStorage.getItem(LS_KEY) || '', 10);
+      return v > 0 && Number.isFinite(v) ? v : null;
+    }
+
+    function saveK(k) {
+      localStorage.setItem(LS_KEY, String(k));
+    }
+
+    function clearK() {
+      localStorage.removeItem(LS_KEY);
+    }
+
+    function refreshKDisplay() {
+      const k = loadK();
+      document.getElementById('kVal').textContent =
+        k != null ? k.toFixed(2) + ' 円/(ロット·ドル)' : '—（未設定）';
+    }
+
+    function dollarWidthFromPrices() {
+      const a = parseFloat(document.getElementById('calEntry').value, 10);
+      const b = parseFloat(document.getElementById('calExit').value, 10);
+      if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
+      return Math.abs(b - a);
+    }
+
+    document.getElementById('btnCal').addEventListener('click', () => {
+      const msg = document.getElementById('calMsg');
+      msg.textContent = '';
+      msg.className = 'msg';
+
+      let lot = parseFloat(document.getElementById('calLot').value, 10);
+      let pnl = parseFloat(document.getElementById('calPnl').value, 10);
+      let w = parseFloat(document.getElementById('calWidth').value, 10);
+      const wp = dollarWidthFromPrices();
+      if (Number.isFinite(wp) && wp > 0) w = wp;
+      if (!(lot > 0) || !(w > 0)) {
+        msg.textContent = 'ロットと値幅（ドル）を入力するか、建値・決済値を入れてください。';
+        msg.classList.add('err');
+        return;
+      }
+      if (!Number.isFinite(pnl)) {
+        msg.textContent = '損益（円）を入力してください。';
+        msg.classList.add('err');
+        return;
+      }
+      const k = Math.abs(pnl) / (lot * w);
+      if (!(k > 0) || !Number.isFinite(k)) {
+        msg.textContent = '係数を計算できませんでした。';
+        msg.classList.add('err');
+        return;
+      }
+      saveK(k);
+      msg.textContent = '保存しました。ロット計算画面に戻れます。';
+      msg.classList.add('ok');
+      refreshKDisplay();
+    });
+
+    document.getElementById('btnClear').addEventListener('click', () => {
+      clearK();
+      document.getElementById('calMsg').textContent = 'k を削除しました。';
+      document.getElementById('calMsg').className = 'msg ok';
+      refreshKDisplay();
+    });
+
+    refreshKDisplay();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(function () {});
+    }
+  </script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 /* lot-calculator-web — 最小キャッシュ（オフライン時にシェル表示） */
-const CACHE = 'tra-lot-calc-v1';
-const PRECACHE_URLS = ['index.html', 'manifest.webmanifest', 'icon.svg'];
+const CACHE = 'tra-lot-calc-v2';
+const PRECACHE_URLS = ['index.html', 'setup.html', 'manifest.webmanifest', 'icon.svg'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

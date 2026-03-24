@@ -24,7 +24,7 @@
 
 | ファイル | 役割 |
 |----------|------|
-| `index.html` | メイン（推奨ロット）・右上⚙で設定へ |
+| `index.html` | メイン（推奨ロット） |
 | `setup.html` | 初期設定（係数 k） |
 | `manifest.webmanifest` | PWA（standalone） |
 | `sw.js` | Service Worker |
